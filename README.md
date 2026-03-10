@@ -32,31 +32,31 @@ Following algorithms are implemented in PythonLinearNonlinearControl
 
 - [Linear Model Predictive Control (MPC)](http://www2.eng.cam.ac.uk/~jmm1/mpcbook/mpcbook.html)
   - Ref: Maciejowski, J. M. (2002). Predictive control: with constraints.
-    - [script](PythonLinearNonlinearControl/controllers/mpc.py)
+    - [script](PythonLinearNonlinearControl/controllers/optimization_based_controllers/mpc.py)
 - [Cross Entropy Method (CEM)](https://arxiv.org/abs/1805.12114)
   - Ref: Chua, K., Calandra, R., McAllister, R., & Levine, S. (2018). Deep reinforcement learning in a handful of trials using probabilistic dynamics models. In Advances in Neural Information Processing Systems (pp. 4754-4765)
-    - [script](PythonLinearNonlinearControl/controllers/cem.py)
+    - [script](PythonLinearNonlinearControl/controllers/derivative_free_controllers/cem.py)
 - [Model Predictive Path Integral Control of Nagabandi, A. (MPPI)](https://arxiv.org/abs/1909.11652)
   - Ref: Nagabandi, A., Konoglie, K., Levine, S., & Kumar, V. (2019). Deep Dynamics Models for Learning Dexterous Manipulation. arXiv preprint arXiv:1909.11652.
-    - [script](PythonLinearNonlinearControl/controllers/mppi.py)
+    - [script](PythonLinearNonlinearControl/controllers/derivative_free_controllers/mppi.py)
 - [Model Predictive Path Integral Control of Williams, G. (MPPIWilliams)](https://ieeexplore.ieee.org/abstract/document/7989202)
   - Ref: Williams, G., Wagener, N., Goldfain, B., Drews, P., Rehg, J. M., Boots, B., & Theodorou, E. A. (2017, May). Information theoretic MPC for model-based reinforcement learning. In 2017 IEEE International Conference on Robotics and Automation (ICRA) (pp. 1714-1721). IEEE.
-    - [script](PythonLinearNonlinearControl/controllers/mppi_williams.py)
+    - [script](PythonLinearNonlinearControl/controllers/derivative_free_controllers/mppi_williams.py)
 - [Random Shooting Method (Random)](https://arxiv.org/abs/1805.12114)
   - Ref: Chua, K., Calandra, R., McAllister, R., & Levine, S. (2018). Deep reinforcement learning in a handful of trials using probabilistic dynamics models. In Advances in Neural Information Processing Systems (pp. 4754-4765)
-    - [script](PythonLinearNonlinearControl/controllers/random.py)
+    - [script](PythonLinearNonlinearControl/controllers/derivative_free_controllers/random.py)
 - [Iterative LQR (iLQR)](https://ieeexplore.ieee.org/document/6386025)
   - Ref: Tassa, Y., Erez, T., & Todorov, E. (2012, October). Synthesis and stabilization of complex behaviors through online trajectory optimization. In 2012 IEEE/RSJ International Conference on Intelligent Robots and Systems (pp. 4906-4913). IEEE. and [Study Wolf](https://github.com/studywolf/control), https://github.com/anassinator/ilqr
-    - [script](PythonLinearNonlinearControl/controllers/ilqr.py)
+    - [script](PythonLinearNonlinearControl/controllers/gradient_based_controllers/ilqr.py)
 - [Dynamic Differential Programming (DDP)](https://ieeexplore.ieee.org/document/6386025)
   - Ref: Tassa, Y., Erez, T., & Todorov, E. (2012, October). Synthesis and stabilization of complex behaviors through online trajectory optimization. In 2012 IEEE/RSJ International Conference on Intelligent Robots and Systems (pp. 4906-4913). IEEE. and [Study Wolf](https://github.com/studywolf/control), https://github.com/anassinator/ilqr
-    - [script](PythonLinearNonlinearControl/controllers/ddp.py)
+    - [script](PythonLinearNonlinearControl/controllers/gradient_based_controllers/ddp.py)
 - [Unconstrained Nonlinear Model Predictive Control (NMPC)](https://www.sciencedirect.com/science/article/pii/S0005109897000058)
   - Ref: Ohtsuka, T., & Fujii, H. A. (1997). Real-time optimization algorithm for nonlinear receding-horizon control. Automatica, 33(6), 1147-1154.
-    - [script](PythonLinearNonlinearControl/controllers/nmpc.py)
+    - [script](PythonLinearNonlinearControl/controllers/gradient_based_controllers/nmpc.py)
 - [Constrained Nonlinear Model Predictive Control -CGMRES- (NMPC-CGMRES)](https://www.sciencedirect.com/science/article/pii/S0005109897000058)
   - Ref: Ohtsuka, T., & Fujii, H. A. (1997). Real-time optimization algorithm for nonlinear receding-horizon control. Automatica, 33(6), 1147-1154.
-    - [script](PythonLinearNonlinearControl/controllers/nmpc_cgmres.py)
+    - [script](PythonLinearNonlinearControl/controllers/gradient_based_controllers/nmpc_cgmres.py)
 - [Constrained Nonlinear Model Predictive Control -Newton- (NMPC-Newton)](https://www.sciencedirect.com/science/article/pii/S0005109897000058)
   - Ref: Ohtsuka, T., & Fujii, H. A. (1997). Real-time optimization algorithm for nonlinear receding-horizon control. Automatica, 33(6), 1147-1154.
     - [script (Coming soon)]()
@@ -213,8 +213,8 @@ PythonLinearNonlinearControl is licensed under the MIT License. However, some sc
 
 The following parts are licensed under GPL3+:
 
-- [ilqr](PythonLinearNonlinearControl/controllers/ilqr.py)
-- [ddp](PythonLinearNonlinearControl/controllers/ddp.py)
+- [ilqr](PythonLinearNonlinearControl/controllers/gradient_based_controllers/ilqr.py)
+- [ddp](PythonLinearNonlinearControl/controllers/gradient_based_controllers/ddp.py)
 
 See the [licenses folder](./licenses) for the full text of the licenses.
 

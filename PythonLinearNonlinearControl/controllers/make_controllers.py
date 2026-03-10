@@ -1,12 +1,12 @@
-from .mpc import LinearMPC
-from .cem import CEM
-from .random import RandomShooting
-from .mppi import MPPI
-from .mppi_williams import MPPIWilliams
-from .ilqr import iLQR
-from .ddp import DDP
-from .nmpc import NMPC
-from .nmpc_cgmres import NMPCCGMRES
+from PythonLinearNonlinearControl.controllers.optimization_based_controllers.mpc import LinearMPC
+from PythonLinearNonlinearControl.controllers.derivative_free_controllers.cem import CEM
+from PythonLinearNonlinearControl.controllers.derivative_free_controllers.random import RandomShooting
+from PythonLinearNonlinearControl.controllers.derivative_free_controllers.mppi import MPPI
+from PythonLinearNonlinearControl.controllers.derivative_free_controllers.mppi_williams import MPPIWilliams
+from PythonLinearNonlinearControl.controllers.gradient_based_controllers.ilqr import iLQR
+from PythonLinearNonlinearControl.controllers.gradient_based_controllers.ddp import DDP
+from PythonLinearNonlinearControl.controllers.gradient_based_controllers.nmpc import NMPC
+from PythonLinearNonlinearControl.controllers.gradient_based_controllers.nmpc_cgmres import NMPCCGMRES
 
 
 def make_controller(args, config, model):

@@ -3,8 +3,7 @@ from logging import getLogger
 import numpy as np
 import scipy.stats as stats
 
-from .controller import Controller
-from ..envs.cost import calc_cost
+from PythonLinearNonlinearControl.controllers.controller import Controller
 
 logger = getLogger(__name__)
 

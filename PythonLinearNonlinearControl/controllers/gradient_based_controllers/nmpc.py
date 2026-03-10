@@ -1,11 +1,9 @@
 from logging import getLogger
 
 import numpy as np
-import scipy.stats as stats
 
-from .controller import Controller
-from ..envs.cost import calc_cost
-from ..common.utils import line_search
+from PythonLinearNonlinearControl.controllers.controller import Controller
+from PythonLinearNonlinearControl.common.utils import line_search
 
 logger = getLogger(__name__)
 
