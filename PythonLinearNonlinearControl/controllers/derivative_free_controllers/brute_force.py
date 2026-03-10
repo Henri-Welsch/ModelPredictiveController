@@ -28,30 +28,11 @@ class BruteForce(Controller):
         # brute force parameters
         # No parameters to set
 
-
-        # get bound or discrete actions
+        # get bound
         self.discrete_actions = config.DISCRETE_ACTIONS
 
         # generate all possible inputs for one time step
         self.possible_inputs_per_step = self.discrete_actions
-
-        # All combinations for a single time step
-        # shape (num_combos_per_step, input_size)
-        self.single_step_combos = np.array(list(itertools.product(*self.possible_inputs_per_step)))
-
-        # All combinations for the entire prediction horizon
-        # This will be HUGE if pred_len is large!
-        # shape (num_combos_per_step^pred_len, pred_len, input_size)
-        
-        # itertools.product(*[self.single_step_combos] * self.pred_len)
-        # However, to use calc_cost, we need (pop_size, pred_len, input_size)
-        
-        # We'll generate this on the fly or pre-calculate if memory allows.
-        # For small systems as requested, this should be okay.
-        
-        all_combos_gen = itertools.product(self.single_step_combos, repeat=self.pred_len)
-        self.samples = np.array(list(all_combos_gen))
-        self.pop_size = self.samples.shape[0]
 
         # get cost func
         self.state_cost_fn = config.state_cost_fn
@@ -70,11 +51,14 @@ class BruteForce(Controller):
         Returns:
             opt_input (numpy.ndarray): optimal input, shape(input_size, )
         """
+        single_step_combos = np.array(list(itertools.product(*self.possible_inputs_per_step)))
+        samples = np.array(list(itertools.product(single_step_combos, repeat=self.pred_len)))
+
         # calc cost
-        costs = self.calc_cost(curr_x, self.samples, g_xs)
+        costs = self.calc_cost(curr_x, samples, g_xs)
 
         # solution
-        sol = self.samples[np.argmin(costs)]
+        sol = samples[np.argmin(costs)]
 
         return sol[0]
 
