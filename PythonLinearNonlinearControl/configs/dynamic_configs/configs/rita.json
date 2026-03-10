@@ -1,0 +1,24 @@
+{
+  "name": "GreenhouseMPC",
+  "type": "Nonlinear",
+  "dt": 10,
+  "pred_len": 3,
+
+  "state": {
+    "names": ["sensor.awair_element_82522_humidity", "sensor.awair_element_82522_temperature", "sensor.outdoor_brightness_lux", "sensor.awair_element_82522_humidity", "sensor.outdoor_temperature_weatherstation"],
+    "goal": [60, 25, 400, 99, 20],
+    "Q": [10.0, 2.0, 0, 0, 0],
+    "Sf": [20.0, 4.0, 0, 0, 0]
+  },
+
+  "action": {
+    "names": ["cover.rita_window_e_e_window", "cover.rita_window_w_w_window", "switch.rita_relay_08"],
+    "discrete_actions": [[0, 25, 50, 75, 100], [0, 25, 50, 75, 100], [0, 1]],
+    "R": [0.1, 0.05, 0.1]
+  },
+
+  "opt_config": {
+    "population": 512,
+    "elite_ratio": 0.1
+  }
+}

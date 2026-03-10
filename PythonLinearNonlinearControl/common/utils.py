@@ -1,4 +1,10 @@
+import os
+
 import numpy as np
+import xgboost as xgb
+
+from PythonLinearNonlinearControl.models.composite_models.predictors.base_predictor import Predictor
+from PythonLinearNonlinearControl.models.composite_models.predictors.xgboost_predictor import XGBoostPredictor
 
 
 def rotate_pos(pos, angle):
@@ -145,3 +151,27 @@ def line_search(grad, sol, compute_eval_val,
             break
 
     return alpha
+
+def load_xgboost_models_as(folder_path: str) -> dict[str, Predictor]:
+    """
+    Load all XGBoost models from a folder and return Predictor-interface adapters keyed by filename.
+
+    Returns:
+        dict[str, SingleTargetPredictor]: { "<filename>.json": XGBoostPredictorAdapter(...) }
+    """
+    model_files = sorted([
+        f for f in os.listdir(folder_path)
+        if f.endswith(".json")
+    ])
+
+    predictors_by_filename: dict[str, Predictor] = {}
+    for filename in model_files:
+        full_path = os.path.join(folder_path, filename)
+        model = xgb.XGBRegressor()
+        model.load_model(full_path)
+
+        predictor = XGBoostPredictor(model.get_booster())
+        predictor_name = filename.replace(".json", "")
+        predictors_by_filename[predictor_name] = predictor
+
+    return predictors_by_filename
