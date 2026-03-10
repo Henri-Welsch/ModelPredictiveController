@@ -11,7 +11,7 @@ class XGBoostPredictor(Predictor):
         return self._booster.predict(features)
 
     def get_feature_names(self) -> list[str]:
-        return self._booster.get_booster().feature_names
+        return self._booster.feature_names
 
 
 
