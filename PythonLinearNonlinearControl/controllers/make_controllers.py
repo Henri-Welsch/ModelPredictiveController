@@ -1,6 +1,7 @@
 from PythonLinearNonlinearControl.controllers.optimization_based_controllers.mpc import LinearMPC
 from PythonLinearNonlinearControl.controllers.derivative_free_controllers.cem import CEM
 from PythonLinearNonlinearControl.controllers.derivative_free_controllers.random import RandomShooting
+from PythonLinearNonlinearControl.controllers.derivative_free_controllers.brute_force import BruteForce
 from PythonLinearNonlinearControl.controllers.derivative_free_controllers.mppi import MPPI
 from PythonLinearNonlinearControl.controllers.derivative_free_controllers.mppi_williams import MPPIWilliams
 from PythonLinearNonlinearControl.controllers.gradient_based_controllers.ilqr import iLQR
@@ -17,6 +18,8 @@ def make_controller(args, config, model):
         return CEM(config, model)
     elif args.controller_type == "Random":
         return RandomShooting(config, model)
+    elif args.controller_type == "BruteForce":
+        return BruteForce(config, model)
     elif args.controller_type == "MPPI":
         return MPPI(config, model)
     elif args.controller_type == "MPPIWilliams":
