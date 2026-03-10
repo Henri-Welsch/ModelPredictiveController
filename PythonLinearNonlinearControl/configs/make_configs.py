@@ -1,7 +1,7 @@
-from .first_order_lag import FirstOrderLagConfigModule
-from .two_wheeled import TwoWheeledConfigModule, TwoWheeledExtendConfigModule
-from .cartpole import CartPoleConfigModule
-from .nonlinear_sample_system import NonlinearSampleSystemConfigModule, NonlinearSampleSystemExtendConfigModule
+from PythonLinearNonlinearControl.configs.experimental_configs.first_order_lag import FirstOrderLagConfigModule
+from PythonLinearNonlinearControl.configs.experimental_configs.two_wheeled import TwoWheeledConfigModule, TwoWheeledExtendConfigModule
+from PythonLinearNonlinearControl.configs.experimental_configs.cartpole import CartPoleConfigModule
+from PythonLinearNonlinearControl.configs.experimental_configs.nonlinear_sample_system import NonlinearSampleSystemConfigModule, NonlinearSampleSystemExtendConfigModule
 
 
 def make_config(args):

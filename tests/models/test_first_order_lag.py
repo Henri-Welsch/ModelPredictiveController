@@ -5,7 +5,7 @@ from PythonLinearNonlinearControl.models.base_model \
     import LinearModel
 from PythonLinearNonlinearControl.models.experimental_models.first_order_lag \
     import FirstOrderLagModel
-from PythonLinearNonlinearControl.configs.first_order_lag \
+from PythonLinearNonlinearControl.configs.experimental_configs.first_order_lag \
     import FirstOrderLagConfigModule
 
 from unittest.mock import patch

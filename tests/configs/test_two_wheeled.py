@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from PythonLinearNonlinearControl.configs.two_wheeled \
+from PythonLinearNonlinearControl.configs.experimental_configs.two_wheeled \
     import TwoWheeledConfigModule
 
 

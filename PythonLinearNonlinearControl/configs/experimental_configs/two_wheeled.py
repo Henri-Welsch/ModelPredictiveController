@@ -1,8 +1,8 @@
 import numpy as np
 from matplotlib.axes import Axes
 
-from ..plotters.plot_objs import square_with_angle, square
-from ..common.utils import fit_angle_in_range
+from PythonLinearNonlinearControl.plotters.plot_objs import square_with_angle, square
+from PythonLinearNonlinearControl.common.utils import fit_angle_in_range
 
 
 class TwoWheeledConfigModule():

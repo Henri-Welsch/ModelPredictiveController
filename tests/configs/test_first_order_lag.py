@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from PythonLinearNonlinearControl.configs.first_order_lag \
+from PythonLinearNonlinearControl.configs.experimental_configs.first_order_lag \
     import FirstOrderLagConfigModule
 
 class TestCalcCost():
