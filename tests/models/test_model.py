@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from PythonLinearNonlinearControl.models.model import LinearModel
+from PythonLinearNonlinearControl.models.base_model import LinearModel
 
 class TestLinearModel():
     """

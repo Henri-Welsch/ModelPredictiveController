@@ -1,15 +1,15 @@
 import pytest
 import numpy as np
 
-from PythonLinearNonlinearControl.models.model \
+from PythonLinearNonlinearControl.models.base_model \
     import LinearModel
-from PythonLinearNonlinearControl.models.first_order_lag \
+from PythonLinearNonlinearControl.models.experimental_models.first_order_lag \
     import FirstOrderLagModel
 from PythonLinearNonlinearControl.configs.first_order_lag \
     import FirstOrderLagConfigModule
 
 from unittest.mock import patch
-from unittest.mock import Mock
+
 
 class TestFirstOrderLagModel():
     """

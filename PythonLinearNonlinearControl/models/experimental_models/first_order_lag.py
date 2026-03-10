@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.linalg
 from scipy import integrate
-from .model import LinearModel
+from PythonLinearNonlinearControl.models.base_model import LinearModel
 
 
 class FirstOrderLagModel(LinearModel):

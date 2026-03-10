@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from PythonLinearNonlinearControl.models.cartpole import CartPoleModel
+from PythonLinearNonlinearControl.models.experimental_models.cartpole import CartPoleModel
 from PythonLinearNonlinearControl.configs.cartpole \
     import CartPoleConfigModule
     

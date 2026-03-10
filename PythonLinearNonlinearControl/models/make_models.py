@@ -1,7 +1,7 @@
-from .first_order_lag import FirstOrderLagModel
-from .two_wheeled import TwoWheeledModel
-from .cartpole import CartPoleModel
-from .nonlinear_sample_system import NonlinearSampleSystemModel
+from PythonLinearNonlinearControl.models.experimental_models.first_order_lag import FirstOrderLagModel
+from PythonLinearNonlinearControl.models.experimental_models.two_wheeled import TwoWheeledModel
+from PythonLinearNonlinearControl.models.experimental_models.cartpole import CartPoleModel
+from PythonLinearNonlinearControl.models.experimental_models.nonlinear_sample_system import NonlinearSampleSystemModel
 
 
 def make_model(args, config):

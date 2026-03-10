@@ -1,6 +1,6 @@
 import numpy as np
 
-from .model import Model
+from PythonLinearNonlinearControl.models.base_model import Model
 
 
 class CartPoleModel(Model):

@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from PythonLinearNonlinearControl.models.two_wheeled import TwoWheeledModel
+from PythonLinearNonlinearControl.models.experimental_models.two_wheeled import TwoWheeledModel
 from PythonLinearNonlinearControl.configs.two_wheeled \
     import TwoWheeledConfigModule
     
