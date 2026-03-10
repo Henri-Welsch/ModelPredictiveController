@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
 class StateConfig:
     names: list[str]
     goal: list[float]
+    curr_x: list[float]
+
     Q: list[float]
     Sf: list[float]
 
@@ -13,10 +14,8 @@ class StateConfig:
 @dataclass
 class ActionConfig:
     names: list[str]
-    lower: list[float] = None
-    upper: list[float] = None
-    R: list[float] = None
-    discrete_actions: list[list[float]] = None
+    discrete_actions: list[list[float]]
+    R: list[float]
 
 
 @dataclass
@@ -28,5 +27,3 @@ class RawConfig:
 
     state: StateConfig
     action: ActionConfig
-
-    opt_config: dict[str, Any]

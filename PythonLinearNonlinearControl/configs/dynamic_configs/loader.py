@@ -7,7 +7,7 @@ from .schema import RawConfig, StateConfig, ActionConfig
 def load_raw_config(path: str | Path) -> RawConfig:
     data = json.loads(Path(path).read_text())
 
-    # filter out unknown keys for ActionConfig
+    # filter out unknown keys for ActionCosnfig
     action_data = data["action"].copy()
     action_keys = {f.name for f in ActionConfig.__dataclass_fields__.values()}
     filtered_action = {k: v for k, v in action_data.items() if k in action_keys}
@@ -30,5 +30,4 @@ def load_raw_config(path: str | Path) -> RawConfig:
         pred_len=int(data["pred_len"]),
         state=StateConfig(**data["state"]),
         action=ActionConfig(**filtered_action),
-        opt_config=data.get("opt_config", {}),
     )

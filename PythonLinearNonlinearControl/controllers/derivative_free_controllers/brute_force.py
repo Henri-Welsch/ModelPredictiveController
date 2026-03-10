@@ -26,24 +26,14 @@ class BruteForce(Controller):
         self.input_size = config.INPUT_SIZE
 
         # brute force parameters
-        # we expect a step size or number of divisions for each input dimension
-        self.step_size = config.opt_config.get("BruteForce", {}).get("step_size", 0.1)
+        # No parameters to set
 
-        # get bound
-        self.input_upper_bounds = config.INPUT_UPPER_BOUND
-        self.input_lower_bounds = config.INPUT_LOWER_BOUND
+
+        # get bound or discrete actions
+        self.discrete_actions = config.DISCRETE_ACTIONS
 
         # generate all possible inputs for one time step
-        # TODO: Change from continues to discrete
-        self.possible_inputs_per_step = []
-        for i in range(self.input_size):
-            low = self.input_lower_bounds[i]
-            high = self.input_upper_bounds[i]
-            # create range of values for each input dimension
-            # Ensure we include both lower and upper bounds if possible
-            num_steps = int(np.ceil((high - low) / self.step_size)) + 1
-            vals = np.linspace(low, high, num_steps)
-            self.possible_inputs_per_step.append(vals)
+        self.possible_inputs_per_step = self.discrete_actions
 
         # All combinations for a single time step
         # shape (num_combos_per_step, input_size)

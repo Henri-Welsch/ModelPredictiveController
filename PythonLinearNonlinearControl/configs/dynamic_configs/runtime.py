@@ -16,15 +16,11 @@ class ControlConfig:
     INPUT_SIZE: int
 
     goal_state: np.ndarray
+    curr_state: np.ndarray
 
     Q: np.ndarray
     Sf: np.ndarray
     R: np.ndarray
-
-    opt_config: dict[str, Any]
-
-    INPUT_LOWER_BOUND: np.ndarray = None
-    INPUT_UPPER_BOUND: np.ndarray = None
     
     DISCRETE_ACTIONS: list[np.ndarray] = None
 
