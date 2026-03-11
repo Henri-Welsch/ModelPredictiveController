@@ -51,7 +51,10 @@ class BruteForce(Controller):
         Returns:
             opt_input (numpy.ndarray): optimal input, shape(input_size, )
         """
+        # generate all possible inputs for a single time step
         single_step_combos = np.array(list(itertools.product(*self.possible_inputs_per_step)))
+
+        # generate all possible inputs for all time steps
         samples = np.array(list(itertools.product(single_step_combos, repeat=self.pred_len)))
 
         # calc cost
