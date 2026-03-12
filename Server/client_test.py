@@ -26,6 +26,7 @@ class ClientTest:
         self._result_futures = {}
         self._message_id = 0
 
+
     async def connect(self):
         # Connection to Home Assistant API and sending an authentication message.
         # https://developers.home-assistant.io/docs/api/websocket/#authentication-phase
@@ -80,6 +81,21 @@ class ClientTest:
         logger.info("Response from Home Assistant: %s", response)
 
 
+    async def subscribe_to_events(self):
+        # Subscribe to events / state changes from Home Assistant
+        # https://developers.home-assistant.io/docs/api/websocket/#subscribe-to-events
+        logger.info("Subscribing to events / state changes from Home Assistant")
+
+        message_id: int = await self._get_message_id()
+        message: dict = {"id": message_id, "type": "subscribe_events", "event_type": "state_changed"}
+        future = asyncio.get_running_loop().create_future()
+        self._result_futures[message_id] = future
+        await self._websocket.send(json.dumps(message))
+
+        response: dict = await future
+        logger.info("Response from Home Assistant: %s", response)
+
+
     async def _traffic_handler(self):
         # Continuously read messages from the Home Assistant WebSocket API
         # This loop is used to handle multiple requests and responses
@@ -116,6 +132,7 @@ async def main():
     client = ClientTest(home_assistant_ws_url, access_token)
     await client.connect()
     await client.fetch_states()
+    await client.subscribe_to_events()
     while True:
         await asyncio.sleep(1)
 
