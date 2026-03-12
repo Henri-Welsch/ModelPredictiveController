@@ -3,9 +3,11 @@ import json
 import os
 
 import websockets
+from dotenv import load_dotenv
 
-from Greiveldange.Server.registry import Registry
-from Tools.custom_logger import logger
+
+from Server.custom_logger import logger
+from Server.registry import Registry
 
 """
 @author Henri-Welsch
@@ -22,6 +24,7 @@ class Client:
         self.token = token
         self.websocket = None
         self.connected = False
+        self.identifier = 0
 
     async def connect(self):
         """Establish WebSocket connection and authenticate."""
@@ -39,6 +42,7 @@ class Client:
 
         # Authenticate and subscribe to events
         await self.authenticate()
+        await self.fetch_states()
         await self.subscribe_to_events()
 
         # Start listening for messages
@@ -59,12 +63,12 @@ class Client:
         if auth_data.get("type") != "auth_ok":
             logger.error("Authentication failed! Now closing WebSocket connection.")
             self.connected = False
-            await self.websocket.close()
+            await self.websocket.disconnect()
 
 
     async def subscribe_to_events(self):
         """Subscribe to state changes."""
-        subscribe_message = {"id": 1, "type": "subscribe_events", "event_type": "state_changed"}
+        subscribe_message = {"id": await self.get_identifier(), "type": "subscribe_events", "event_type": "state_changed"}
         await self.websocket.send(json.dumps(subscribe_message))
         logger.info("Sent subscription message")
 
@@ -76,9 +80,25 @@ class Client:
         if subscribe_data.get("success") is not True:
             logger.error("Failed to subscribe to state changes! Now closing WebSocket connection.")
             self.connected = False
-            await self.websocket.close()
+            await self.websocket.disconnect()
 
         return subscribe_response
+
+
+    async def fetch_states(self):
+        """Read data from the WebSocket connection."""
+        message = {"id": await self.get_identifier(), "type": "get_states"}
+        await self.websocket.send(json.dumps(message))
+        logger.info("Sent get_states message")
+
+        # Wait for the response
+        response = await self.websocket.recv()
+        response_data = json.loads(response)
+        entities = response_data["result"]
+        logger.info(f"Home Assistant responded with {len(entities)} entities")
+
+        # Initialize the Registry
+        Registry.initiate(entities)
 
 
     async def listen(self):
@@ -90,6 +110,16 @@ class Client:
         except websockets.ConnectionClosed:
             logger.warning("WebSocket connection closed.")
 
+    async def disconnect(self):
+        """Close the WebSocket connection."""
+        if self.websocket:
+            await self.websocket.disconnect()
+            self.connected = False
+
+    async def get_identifier(self):
+        """Generate a unique identifier for each message."""
+        self.identifier += 1
+        return self.identifier
 
     @staticmethod
     async def handle_message(message: dict):
@@ -97,13 +127,19 @@ class Client:
         # logger.info(f"Received message: {message}")
 
         if message.get("type") == "event":
-            entity_id = message.get("event").get("data").get("entity_id")
-            Registry.register(entity_id, message)
+            entity_state = message.get("event").get("data").get("new_state")
+            entity_id = entity_state.get("entity_id")
+
+            Registry.register(entity_id, entity_state)
         else:
             logger.warning(f"Unknown message type: {message}")
 
+
+
+
 # TODO: This is just for testing, remove later!
 async def main():
+    load_dotenv()
     HOME_ASSISTANT_WS_URL = os.getenv("HOME_ASSISTANT_WS_URL")
     ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 
