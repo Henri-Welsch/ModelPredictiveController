@@ -78,6 +78,7 @@ class ClientTest:
         await self._websocket.send(json.dumps(message))
 
         response: dict = await future
+        response["result"] = len(response.get("result"))
         logger.info("Response from Home Assistant: %s", response)
 
 
@@ -110,7 +111,7 @@ class ClientTest:
                     logger.debug("Received message from Home Assistant: %s", message)
                     self._result_futures.pop(message_id).set_result(message)
                 else:
-                    logger.warning("Received unexpected message from Home Assistant: %s", message)
+                    logger.warning("Received unexpected message from Home Assistant")
         except websockets.ConnectionClosed:
             logger.warning("WebSocket connection closed")
 
