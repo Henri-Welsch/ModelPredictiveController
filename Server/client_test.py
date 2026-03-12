@@ -6,6 +6,7 @@ import websockets
 from dotenv import load_dotenv
 
 from Server.custom_logger import setup_custom_logger
+from Server.registry import Registry
 
 logger = setup_custom_logger("websocket_client")
 
@@ -40,6 +41,8 @@ class ClientTest:
 
             await self._authenticate()
             asyncio.create_task(self._traffic_handler())
+        except asyncio.TimeoutError:
+            logger.error("Connection to Home Assistant timed out")
         except OSError:
             logger.error("Failed to connect to Home Assistant WebSocket API")
             await self.disconnect()
@@ -48,10 +51,9 @@ class ClientTest:
     async def _authenticate(self):
         # Send an authentication message to Home Assistant
         # https://developers.home-assistant.io/docs/api/websocket/#authentication-phase
-        logger_message = "Authenticating with Home Assistant Websocket API using %s"
-        logger.info(logger_message, self._token)
-
         message: dict = {"type": "auth", "access_token": self._token}
+        logger.info("Requesting authentication: %s", json.dumps(message))
+
         await self._websocket.send(json.dumps(message))
         response_raw: str = await self._websocket.recv()
         response: dict = json.loads(response_raw)
@@ -69,26 +71,28 @@ class ClientTest:
 
     async def fetch_states(self):
         # Fetch the current state of all entities from Home Assistant
-        logger.info("Fetching states from Home Assistant")
-
         message_id: int = await self._get_message_id()
         message: dict = {"id": message_id, "type": "get_states"}
+        logger.info("Requesting initial system state: %s", json.dumps(message))
+
         future = asyncio.get_running_loop().create_future()
         self._result_futures[message_id] = future
         await self._websocket.send(json.dumps(message))
 
         response: dict = await future
-        response["result"] = len(response.get("result"))
-        logger.info("Response from Home Assistant: %s", response)
+        Registry.initiate(response["result"])
+
+        response["result"] = str(len(response.get("result"))) + " entities"
+        logger.info("Response from Home Assistant: %s ", response)
 
 
     async def subscribe_to_events(self):
         # Subscribe to events / state changes from Home Assistant
         # https://developers.home-assistant.io/docs/api/websocket/#subscribe-to-events
-        logger.info("Subscribing to events / state changes from Home Assistant")
-
         message_id: int = await self._get_message_id()
         message: dict = {"id": message_id, "type": "subscribe_events", "event_type": "state_changed"}
+        logger.info("Requesting to subscribe to state changes: %s", json.dumps(message))
+
         future = asyncio.get_running_loop().create_future()
         self._result_futures[message_id] = future
         await self._websocket.send(json.dumps(message))
@@ -111,7 +115,8 @@ class ClientTest:
                     logger.debug("Received message from Home Assistant: %s", message)
                     self._result_futures.pop(message_id).set_result(message)
                 else:
-                    logger.warning("Received unexpected message from Home Assistant")
+                    state = message.get("event").get("data").get("new_state")
+                    Registry.register(state.get("entity_id"), state)
         except websockets.ConnectionClosed:
             logger.warning("WebSocket connection closed")
 
