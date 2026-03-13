@@ -5,134 +5,127 @@ import os
 import websockets
 from dotenv import load_dotenv
 
-
-from Server.custom_logger import logger
+from Server.custom_logger import setup_custom_logger
 from Server.registry import Registry
 
-"""
-@author Henri-Welsch
-@sources {
-    https://developers.home-assistant.io/docs/api/websocket/
-    https://docs.python.org/3/library/asyncio.html
-    https://websockets.readthedocs.io/en/stable/
-}
-"""
+logger = setup_custom_logger("websocket_client")
 
-class Client:
-    def __init__(self, ws_url: str, token: str):
-        self.ws_url = ws_url
-        self.token = token
-        self.websocket = None
-        self.connected = False
-        self.identifier = 0
+class ClientTest:
+    """
+    Class for testing Home Assistant WebSocket API client functionality.
+
+    auther: Henri-Welsch
+    references:
+        https://developers.home-assistant.io/docs/api/websocket/
+        https://github.com/music-assistant/python-hass-client/blob/main/hass_client/client.py
+    """
+
+    def __init__(self, websocket_url, token):
+        self._websocket_url = websocket_url
+        self._token = token
+        self._websocket = None
+        self._result_futures = {}
+        self._message_id = 0
+
 
     async def connect(self):
-        """Establish WebSocket connection and authenticate."""
-        logger.info("Connecting to Home Assistant WebSocket, sending connection request...")
-        self.websocket = await websockets.connect(self.ws_url)
+        # Connection to Home Assistant API and sending an authentication message.
+        # https://developers.home-assistant.io/docs/api/websocket/#authentication-phase
+        logger_message = "Connecting to Home Assistant Websocket API on %s"
+        logger.info(logger_message, self._websocket_url)
 
-        # Wait for auth_required
-        initial_message = await self.websocket.recv()
-        data = json.loads(initial_message)
-        logger.info(f"Home Assistant response: {data}")
+        try:
+            self._websocket = await websockets.connect(self._websocket_url)
+            response_raw = await self._websocket.recv()
+            logger.info("Response from Home Assistant: %s", response_raw)
 
-        if data.get("type") != "auth_required":
-            logger.error("Unexpected message received during authentication: {data}")
-            await self.websocket.close()
-
-        # Authenticate and subscribe to events
-        await self.authenticate()
-        await self.fetch_states()
-        await self.subscribe_to_events()
-
-        # Start listening for messages
-        asyncio.create_task(self.listen())
-        return self.connected
+            await self._authenticate()
+            asyncio.create_task(self._traffic_handler())
+        except asyncio.TimeoutError:
+            logger.error("Connection to Home Assistant timed out")
+        except OSError:
+            logger.error("Failed to connect to Home Assistant WebSocket API")
+            await self.disconnect()
 
 
-    async def authenticate(self):
-        """Authenticate with Home Assistant using the token."""
-        auth_message = {"type": "auth", "access_token": self.token}
-        await self.websocket.send(json.dumps(auth_message))
-        logger.info("Sent authentication token")
+    async def _authenticate(self):
+        # Send an authentication message to Home Assistant
+        # https://developers.home-assistant.io/docs/api/websocket/#authentication-phase
+        message: dict = {"type": "auth", "access_token": self._token}
+        logger.info("Requesting authentication: %s", json.dumps(message))
 
-        auth_response = await self.websocket.recv()
-        auth_data = json.loads(auth_response)
-        logger.info(f"Home Assistant response: {auth_data}")
+        await self._websocket.send(json.dumps(message))
+        response_raw: str = await self._websocket.recv()
+        response: dict = json.loads(response_raw)
+        logger.info("Response from Home Assistant: %s", response)
 
-        if auth_data.get("type") != "auth_ok":
-            logger.error("Authentication failed! Now closing WebSocket connection.")
-            self.connected = False
-            await self.websocket.disconnect()
+        if response.get("type") != "auth_ok":
+            raise Exception("Authentication failed")
 
 
-    async def subscribe_to_events(self):
-        """Subscribe to state changes."""
-        subscribe_message = {"id": await self.get_identifier(), "type": "subscribe_events", "event_type": "state_changed"}
-        await self.websocket.send(json.dumps(subscribe_message))
-        logger.info("Sent subscription message")
-
-        # Wait for subscription confirmation
-        subscribe_response = await self.websocket.recv()
-        subscribe_data = json.loads(subscribe_response)
-        logger.info(f"Home Assistant response: {subscribe_data}")
-
-        if subscribe_data.get("success") is not True:
-            logger.error("Failed to subscribe to state changes! Now closing WebSocket connection.")
-            self.connected = False
-            await self.websocket.disconnect()
-
-        return subscribe_response
+    async def disconnect(self):
+        # Close the connection to the Home Assistant WebSocket API
+        logger.debug("Closing Home Assistant Websocket API connection")
+        await self._websocket.close()
 
 
     async def fetch_states(self):
-        """Read data from the WebSocket connection."""
-        message = {"id": await self.get_identifier(), "type": "get_states"}
-        await self.websocket.send(json.dumps(message))
-        logger.info("Sent get_states message")
+        # Fetch the current state of all entities from Home Assistant
+        # https://developers.home-assistant.io/docs/api/websocket/#fetching-states
+        message_id: int = await self._get_message_id()
+        message: dict = {"id": message_id, "type": "get_states"}
+        logger.info("Requesting initial system state: %s", json.dumps(message))
 
-        # Wait for the response
-        response = await self.websocket.recv()
-        response_data = json.loads(response)
-        entities = response_data["result"]
-        logger.info(f"Home Assistant responded with {len(entities)} entities")
+        future = asyncio.get_running_loop().create_future()
+        self._result_futures[message_id] = future
+        await self._websocket.send(json.dumps(message))
 
-        # Initialize the Registry
-        Registry.initiate(entities)
+        response: dict = await future
+        Registry.initiate(response["result"])
+
+        response["result"] = str(len(response.get("result"))) + " entities"
+        logger.info("Response from Home Assistant: %s ", response)
 
 
-    async def listen(self):
-        """Continuously listen for messages from Home Assistant."""
+    async def subscribe_to_events(self):
+        # Subscribe to events / state changes from Home Assistant
+        # https://developers.home-assistant.io/docs/api/websocket/#subscribe-to-events
+        message_id: int = await self._get_message_id()
+        message: dict = {"id": message_id, "type": "subscribe_events", "event_type": "state_changed"}
+        logger.info("Requesting to subscribe to state changes: %s", json.dumps(message))
+
+        future = asyncio.get_running_loop().create_future()
+        self._result_futures[message_id] = future
+        await self._websocket.send(json.dumps(message))
+
+        response: dict = await future
+        logger.info("Response from Home Assistant: %s", response)
+
+
+    async def _traffic_handler(self):
+        # Continuously read messages from the Home Assistant WebSocket API
+        # This loop is used to handle multiple requests and responses
+        # https://docs.python.org/3/library/asyncio-future.html
         try:
-            async for message in self.websocket:
-                data = json.loads(message)
-                await self.handle_message(data)
+            while True:
+                message_raw: str = await self._websocket.recv()
+                message: dict = json.loads(message_raw)
+                message_id: int = message.get("id")
+
+                if message_id in self._result_futures:
+                    logger.debug("Received message from Home Assistant: %s", message)
+                    self._result_futures.pop(message_id).set_result(message)
+                else:
+                    state = message.get("event").get("data").get("new_state")
+                    Registry.register(state.get("entity_id"), state)
         except websockets.ConnectionClosed:
-            logger.warning("WebSocket connection closed.")
+            logger.warning("WebSocket connection closed")
 
-    async def disconnect(self):
-        """Close the WebSocket connection."""
-        if self.websocket:
-            await self.websocket.disconnect()
-            self.connected = False
+    async def _get_message_id(self):
+        self._message_id += 1
+        return self._message_id
 
-    async def get_identifier(self):
-        """Generate a unique identifier for each message."""
-        self.identifier += 1
-        return self.identifier
 
-    @staticmethod
-    async def handle_message(message: dict):
-        """Process incoming messages."""
-        # logger.info(f"Received message: {message}")
-
-        if message.get("type") == "event":
-            entity_state = message.get("event").get("data").get("new_state")
-            entity_id = entity_state.get("entity_id")
-
-            Registry.register(entity_id, entity_state)
-        else:
-            logger.warning(f"Unknown message type: {message}")
 
 
 
@@ -140,16 +133,15 @@ class Client:
 # TODO: This is just for testing, remove later!
 async def main():
     load_dotenv()
-    HOME_ASSISTANT_WS_URL = os.getenv("HOME_ASSISTANT_WS_URL")
-    ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+    home_assistant_ws_url = os.getenv("HOME_ASSISTANT_WS_URL")
+    access_token = os.getenv("ACCESS_TOKEN")
 
-    client = Client(HOME_ASSISTANT_WS_URL, ACCESS_TOKEN)
+    client = ClientTest(home_assistant_ws_url, access_token)
     await client.connect()
-
-    # Keep the program running
+    await client.fetch_states()
+    await client.subscribe_to_events()
     while True:
         await asyncio.sleep(1)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
