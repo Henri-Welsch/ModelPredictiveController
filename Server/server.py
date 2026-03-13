@@ -1,3 +1,4 @@
+import asyncio
 import os
 import logging
 
@@ -11,7 +12,6 @@ from Server.client import Client
 from Server.logging_config import setup_logging, LOGGING
 from Server.mpc_controller import MPCController
 
-# Load environment variables and configure logging
 load_dotenv()
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -24,8 +24,9 @@ class HomeAssistantServer:
     """
 
     def __init__(self):
+        self.running = None
         self.client = Client(os.getenv("HOME_ASSISTANT_WS_URL"), os.getenv("ACCESS_TOKEN"))
-        self.mpc_controller = MPCController()
+        self.controller = MPCController()
         self.app = FastAPI(lifespan=self.lifespan)
 
     async def websocket_startup(self):
@@ -42,9 +43,25 @@ class HomeAssistantServer:
 
     async def mpc_startup(self):
         logger.info("Starting MPC system...")
-        scheduler.add_job(self.mpc_controller.run, "interval", minutes=1)
+        scheduler.add_job(self.safe_run, "interval", minutes=2)
         scheduler.start()
         logger.info("MPC system started successfully.")
+
+    async def safe_run(self):
+        if self.running:
+            logger.warning("Previous MPC job still running, skipping this interval")
+            return
+        self.running = True
+        try:
+            result = await asyncio.to_thread(self.controller.run)
+            await self.handle_result(result)
+        finally:
+            self.running = False
+
+    async def handle_result(self, result):
+        # Do something with the result, e.g., send actions to Home Assistant
+        logger.info(f"Applying MPC action: {result}")
+
 
     async def mpc_shutdown(self):
         logger.info("Stopping MPC system...")
