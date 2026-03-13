@@ -8,9 +8,10 @@ from dotenv import load_dotenv
 from Server.custom_logger import setup_custom_logger
 from Server.registry import Registry
 
-logger = setup_custom_logger("websocket_client")
+import logging
+logger = logging.getLogger(__name__)
 
-class ClientTest:
+class Client:
     """
     Class for testing Home Assistant WebSocket API client functionality.
 
@@ -136,7 +137,7 @@ async def main():
     home_assistant_ws_url = os.getenv("HOME_ASSISTANT_WS_URL")
     access_token = os.getenv("ACCESS_TOKEN")
 
-    client = ClientTest(home_assistant_ws_url, access_token)
+    client = Client(home_assistant_ws_url, access_token)
     await client.connect()
     await client.fetch_states()
     await client.subscribe_to_events()
